@@ -24,13 +24,13 @@ pipeline {
     }
     stage('Build docker image'){
       steps{
-       sh 'docker build -t marekczajkowski992/abctech:prod .'
+       sh 'docker build -t marekczajkowski992/abctech:latest .'
       }
     }
     stage ('Push Docker Image'){
       steps{
         withDockerRegistry ([ credentialsId: "mydockerhubcred", url: ""]){
-          sh 'docker push marekczajkowski992/abctech:prod'
+          sh 'docker push marekczajkowski992/abctech:latest'
         }
       }
     }
