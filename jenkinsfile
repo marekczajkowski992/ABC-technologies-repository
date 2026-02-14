@@ -1,0 +1,40 @@
+pipeline {
+  agent {
+    label 'docker-job'
+  }	
+ 
+  stages{
+    stage('Code build'){
+      steps{
+        sh 'mvn clean install'
+      }
+    }
+    stage('Code compiling'){
+      steps{
+        sh 'mvn compile'
+      }
+    }
+    stage('Code testing'){
+      steps{
+        sh 'mvn test'
+      }
+    }
+    stage('Code packing'){
+      steps{
+        sh 'mvn package'
+      }
+    }
+    stage('Build docker image'){
+      steps{
+       sh 'docker build -t marekczajkowski992/abctech:latest .'
+      }
+    }
+    stage ('Push Docker Image'){
+      steps{
+        withDockerRegistry ([ credentialsId: "mydockerhubcred", url: ""]){
+          sh 'docker push marekczajkowski992/abctech:latest'
+        }
+      }
+    }
+  }
+}
