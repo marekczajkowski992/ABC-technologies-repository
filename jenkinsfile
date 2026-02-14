@@ -1,7 +1,5 @@
 pipeline {
-  agent {
-    label 'docker-job'
-  }	
+  agent any	
  
   stages{
     stage('Code build'){
