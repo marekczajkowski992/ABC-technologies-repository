@@ -1,0 +1,13 @@
+---
+- name: Deploy ABCtechnologies app to docker container
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Build docker image
+      shell: docker build -t marekczajkowski992/abctech:latest 
+
+    - name: Restart docker-compose
+      shell: "docker-compose down && docker-compose up -d"
+      
+    - name: Ensuring container is running
+      shell: "docker ps"

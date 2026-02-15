@@ -22,11 +22,13 @@ pipeline {
         sh 'mvn package'
       }
     }
-    stage('Build docker image'){
-      steps{
-       sh 'docker build -t marekczajkowski992/abctech:latest .'
+    stage('Run Ansible Playbook') {
+      steps {
+        sshagent(['7e1ef070-124b-43fe-9b24-1db404fcc542']) {
+          sh 'scp abc-container-deploy.yml docker-compose.yml ec2-user@13.49.70.211:/tmp/ && ssh ec2-user@13.49.70.211 "ansible-playbook abc-container-deploy.yml"'
+        }
       }
-    }
+    }    
     stage ('Push Docker Image'){
       steps{
         withDockerRegistry ([ credentialsId: "mydockerhubcred", url: ""]){

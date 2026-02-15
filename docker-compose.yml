@@ -1,0 +1,6 @@
+services:
+  abc-technologies:
+    image: marekczajkowski992/abctech:latest
+    hostname: abc-technologies
+    ports:
+      - 4789:8080
