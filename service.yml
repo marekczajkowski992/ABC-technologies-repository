@@ -7,8 +7,9 @@ spec:
     app: abctech
   ports:
     - protocol: TCP
-      port: 8000
-      targetPort: 8080
+      port: 443
+      targetPort: 4789
+      nodePort: 31778
   type: NodePort
 ---
 apiVersion: v1
@@ -20,6 +21,7 @@ spec:
     app: abctech
   ports:
     - protocol: TCP
-      port: 8000
-      targetPort: 8080
+      port: 443
+      targetPort: 4789
+      nodePort: 31644
   type: LoadBalancer
