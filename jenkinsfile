@@ -33,7 +33,7 @@ pipeline {
         sh 'mvn package'
       }
     }
-    stage('Send artifacts over SSH')
+    stage('Send artifacts over SSH'){
       agent {
         label 'java-node'
       }
