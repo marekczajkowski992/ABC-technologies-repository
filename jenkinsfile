@@ -50,8 +50,9 @@ pipeline {
                 )
               ]
             )
-          ])
-        }
+         ])
+       }
+     }
     stage('Build docker image'){
       agent {
         label 'control-node'
