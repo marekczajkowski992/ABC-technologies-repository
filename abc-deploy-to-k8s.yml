@@ -1,7 +1,6 @@
 ---
 - name: Deploy ABCtechnologies app to kubernetes cluster
   hosts: localhost
-  become: yes
   tasks:
     - name: Create pod
       shell: "kubectl apply -f pod.yml"
