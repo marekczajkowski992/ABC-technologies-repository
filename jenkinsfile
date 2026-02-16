@@ -33,6 +33,25 @@ pipeline {
         sh 'mvn package'
       }
     }
+    stage('Send artifacts over SSH')
+      agent {
+        label 'java-node'
+      }
+      steps{
+        steps {
+          sshPublisher(publishers: [
+            sshPublisherDesc(
+              configName: 'control_node', 
+              transfers: [
+                sshTransfer(
+                  sourceFiles: 'target/*.war,
+                  removePrefix: 'target', 
+                  remoteDirectory: '/home/ec2-user/agent-jobs/agent-jobs/workspace/ci-job/',
+                )
+              ]
+            )
+          ])
+        }
     stage('Build docker image'){
       agent {
         label 'control-node'
