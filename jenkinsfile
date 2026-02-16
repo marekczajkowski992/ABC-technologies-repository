@@ -1,7 +1,5 @@
 pipeline {
-  agent {
-    label 'java_node'	
-  }
+  agent any
   stages{
     stage('Code build'){
       steps{
