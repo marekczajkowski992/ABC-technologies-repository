@@ -52,6 +52,14 @@ pipeline {
           sh 'docker push marekczajkowski992/abctech:latest'
         }
       }
+    }
+    stage('Deploy to k8s'){
+      agent {
+        label 'control-node'
+      }
+      steps{
+        sh 'ansible-playbook abc-deploy-to-k8s.yml'
+      }
     }    
   }
 }
