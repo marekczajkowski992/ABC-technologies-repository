@@ -34,13 +34,13 @@ pipeline {
         stash name: 'artifact', includes: 'target/*.war'
       }
     }
-    stage('Build docker image'){
+    stage('Build docker image and docker container'){
       agent {
         label 'control-node'
       }
       steps{
         unstash 'artifact'
-        sh 'docker build -t marekczajkowski992/abctech:latest .'
+        sh 'ansible-playbook abc-container-deploy.yml .'
       }
     }
     stage ('Push Docker Image'){
