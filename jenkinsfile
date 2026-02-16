@@ -44,7 +44,7 @@ pipeline {
               configName: 'control_node', 
               transfers: [
                 sshTransfer(
-                  sourceFiles: 'target/*.war,
+                  sourceFiles: 'target/*.war',
                   removePrefix: 'target', 
                   remoteDirectory: '/home/ec2-user/agent-jobs/agent-jobs/workspace/ci-job/',
                 )
