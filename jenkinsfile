@@ -1,27 +1,55 @@
 pipeline {
-  agent {
-    label 'java-node'
-  }
+  agent none
   stages{
     stage('Code build'){
+      agent {
+        label 'java-node'
+      }
       steps{
         sh 'mvn clean install'
       }
     }
     stage('Code compiling'){
+      agent {
+        label 'java-node'
+      }
       steps{
         sh 'mvn compile'
       }
     }
     stage('Code testing'){
+      agent {
+        label 'java-node'
+      }
       steps{
         sh 'mvn test'
       }
     }
     stage('Code packing'){
+      agent {
+        label 'java-node'
+      }
       steps{
         sh 'mvn package'
       }
     }
+    stage('Build docker image'){
+      agent {
+        label 'control-node'
+      }
+      steps{
+       sh 'docker build -t marekczajkowski992/abctech:latest .'
+      }
+    }
+    stage ('Push Docker Image'){
+      agent {
+        label 'control-node'
+      }
+      steps{
+        withDockerRegistry ([ credentialsId: "mydockerhubcred", url: ""]){
+          sh 'docker push marekczajkowski992/abctech:latest'
+        }
+      }
+    }    
   }
 }
