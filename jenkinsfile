@@ -40,17 +40,18 @@ pipeline {
       steps{
         sshPublisher(publishers: [
           sshPublisherDesc(
-            configName: 'control_node', 
+            configName: 'control_node',
             transfers: [
               sshTransfer(
                 sourceFiles: 'target/*.war',
-                removePrefix: 'target', 
+                removePrefix: 'target',
                 remoteDirectory: '/home/ec2-user/agent-jobs/agent-jobs/workspace/ci-job/',
               )
             ]
           )
-       ])
-     }
+        ])
+      } 
+    }
     stage('Build docker image'){
       agent {
         label 'control-node'
