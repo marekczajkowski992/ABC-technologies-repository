@@ -1,0 +1,13 @@
+---
+- name: Deploy ABCtechnologies app to kubernetes cluster
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Create pod
+      shell: "kubectl apply -f pod.yml"
+
+    - name: Create deployment
+      shell: "kubectl apply -f deployment.yml"
+
+    - name: Create service
+      shell: "kubectl apply -f service.yml"
