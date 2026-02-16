@@ -1,6 +1,7 @@
 pipeline {
-  agent any	
- 
+  agent {
+    label 'java_node'	
+  }
   stages{
     stage('Code build'){
       steps{
@@ -20,20 +21,6 @@ pipeline {
     stage('Code packing'){
       steps{
         sh 'mvn package'
-      }
-    }
-    stage('Run Ansible Playbook') {
-      steps {
-        sshagent(['7e1ef070-124b-43fe-9b24-1db404fcc542']) {
-          sh 'scp abc-container-deploy.yml docker-compose.yml ec2-user@13.49.70.211:/home/ec2-user/ && ssh ec2-user@13.49.70.211 "ansible-playbook /home/ec2-user/abc-container-deploy.yml"'
-        }
-      }
-    }    
-    stage ('Push Docker Image'){
-      steps{
-        withDockerRegistry ([ credentialsId: "mydockerhubcred", url: ""]){
-          sh 'docker push marekczajkowski992/abctech:latest'
-        }
       }
     }
   }
