@@ -40,7 +40,7 @@ pipeline {
       }
       steps{
         unstash 'artifact'
-        sh 'ansible-playbook abc-container-deploy.yml .'
+        sh 'ansible-playbook abc-container-deploy.yml'
       }
     }
     stage ('Push Docker Image'){
