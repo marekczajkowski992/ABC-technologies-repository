@@ -1,0 +1,153 @@
+---
+- name: Install & run Prometheus (tarball install, systemd-managed)
+  hosts: localhost
+  become: true
+
+  vars:
+    userId: "prometheus"
+    groupId: "prometheus"
+    version: "3.9.1"
+    download_url: "https://github.com/prometheus/prometheus/releases/download/v{{ version }}/prometheus-{{ version }}.linux-amd64.tar.gz"
+    tarball_path: "/tmp/prometheus-{{ version }}.linux-amd64.tar.gz"
+    extract_dir: "/tmp/prometheus-{{ version }}.linux-amd64"
+    bin_dir: "/usr/local/bin"
+    config_dir: "/etc/prometheus"
+    data_dir: "/data/prometheus"
+    service_name: "prometheus"
+    listen_address: "0.0.0.0:9090"
+    retention_time: "15d"
+
+  handlers:
+    - name: Reload systemd
+      systemd:
+        daemon_reload: true
+
+  tasks:
+    - name: Ensure prometheus group exists
+      group:
+        name: "{{ groupId }}"
+        system: true
+
+    - name: Ensure prometheus user exists
+      user:
+        name: "{{ userId }}"
+        group: "{{ groupId }}"
+        system: true
+        shell: /sbin/nologin
+        create_home: false
+        comment: "{{ userId }} nologin user"
+
+    - name: Create config and data directories
+      file:
+        path: "{{ item.path }}"
+        state: directory
+        owner: "{{ item.owner | default(userId) }}"
+        group: "{{ item.group | default(groupId) }}"
+        mode: "{{ item.mode | default('0755') }}"
+      loop:
+        - { path: "{{ config_dir }}" }
+        - { path: "{{ data_dir }}" }
+
+    - name: Download Prometheus tarball
+      get_url:
+        url: "{{ download_url }}"
+        dest: "{{ tarball_path }}"
+        mode: '0644'
+        force: false
+
+    - name: Extract Prometheus tarball
+      unarchive:
+        src: "{{ tarball_path }}"
+        dest: "/tmp/"
+        remote_src: true
+        creates: "{{ extract_dir }}/prometheus"
+
+    - name: Install prometheus binary
+      copy:
+        src: "{{ extract_dir }}/prometheus"
+        dest: "{{ bin_dir }}/prometheus"
+        owner: root
+        group: root
+        mode: '0755'
+        remote_src: true
+
+    - name: Install promtool binary (for config validation)
+      copy:
+        src: "{{ extract_dir }}/promtool"
+        dest: "{{ bin_dir }}/promtool"
+        owner: root
+        group: root
+        mode: '0755'
+        remote_src: true
+
+    - name: Cleanup extracted directory and tarball
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ extract_dir }}"
+        - "{{ tarball_path }}"
+
+    - name: Write Prometheus configuration
+      copy:
+        dest: "{{ config_dir }}/prometheus.yml"
+        owner: "{{ userId }}"
+        group: "{{ groupId }}"
+        mode: '0644'
+        # promtool validates the config before replacing file (prevents bad config)
+        validate: "{{ bin_dir }}/promtool check config %s"
+        content: |
+          global:
+            scrape_interval: 15s
+          scrape_configs:
+            - job_name: 'prometheus'
+              static_configs:
+                - targets: ['localhost:9090']
+
+    - name: Install systemd unit
+      copy:
+        dest: "/etc/systemd/system/{{ service_name }}.service"
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          [Unit]
+          Description=Prometheus
+          Documentation=https://prometheus.io/docs/introduction/overview/
+          Wants=network-online.target
+          After=network-online.target
+          [Service]
+          User={{ userId }}
+          Group={{ groupId }}
+          Type=simple
+          ExecStart={{ bin_dir }}/prometheus \
+            --config.file={{ config_dir }}/prometheus.yml \
+            --storage.tsdb.path={{ data_dir }} \
+            --web.listen-address={{ listen_address }} \
+            --storage.tsdb.retention.time={{ retention_time }}
+          Restart=on-failure
+          RestartSec=5s
+          LimitNOFILE=8192
+          [Install]
+          WantedBy=multi-user.target
+      notify: Reload systemd
+
+    - name: Ensure systemd is reloaded before managing the service
+      meta: flush_handlers
+
+    - name: Enable and start prometheus service
+      systemd:
+        name: "{{ service_name }}"
+        enabled: true
+        state: started
+
+    - name: Wait for Prometheus to be ready
+      uri:
+        url: "http://localhost:9090/-/ready"
+        method: GET
+        status_code: 200
+        validate_certs: false
+      register: _prom_ready
+      retries: 15
+      delay: 2
+      until: _prom_ready.status == 200

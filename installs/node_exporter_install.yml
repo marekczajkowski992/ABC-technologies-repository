@@ -1,0 +1,73 @@
+---
+- name: Install and configure Node Exporter
+  hosts: localhost
+  become: true
+
+  vars:
+    userId: "node_exporter"
+    groupId: "node_exporter"
+    version: "1.7.0"
+
+  tasks:
+    - name: Create node_exporter user
+      user:
+        name: "{{ userId }}"
+        shell: /bin/false
+        createhome: false
+        state: present
+
+    - name: Download Node Exporter tarball
+      get_url:
+        url: "https://github.com/prometheus/node_exporter/releases/download/v{{ version }}/node_exporter-{{ version }}.linux-amd64.tar.gz
+        dest: "/tmp/node_exporter-{{ version }}.linux-amd64.tar.gz"
+
+    - name: Extract Node Exporter tarball
+      unarchive:
+        src: "/tmp/node_exporter-{{ version }}.linux-amd64.tar.gz"
+        dest: /tmp
+        remote_src: yes
+
+    - name: Move Node Exporter to /opt
+      command:
+        cmd: "mv /tmp/node_exporter-{{ version }}.linux-amd64 /opt/node_exporter"
+        creates: /opt/node_exporter
+
+    - name: Change ownership of Node Exporter files
+      file:
+        path: /opt/node_exporter
+        owner: "{{ userId }}"
+        group: "{{ groupId }}"
+        state: directory
+        recurse: yes
+
+    - name: Create systemd service file for Node Exporter
+      copy:
+        dest: /etc/systemd/system/node_exporter.service
+        content: |
+          [Unit]
+          Description=Node Exporter
+          Wants=network-online.target
+          After=network-online.target
+          [Service]
+          User="{{ userId }}"
+          Group="{{ groupId }}"
+          Type=simple
+          ExecStart=/opt/node_exporter/node_exporter --collector.systemd
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd daemon
+      command:
+        cmd: systemctl daemon-reload
+
+    - name: Start Node Exporter service
+      service:
+        name: node_exporter
+        state: started
+        enabled: true
+
+    - name: Check if Node Exporter is accessible.
+      uri:
+        url: http://localhost:9100
+        method: GET
+        status_code: 200

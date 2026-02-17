@@ -1,0 +1,45 @@
+---
+- name: Install Jenkins and related Toolstack
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Update all packages
+      dnf:
+        name: "*"
+        state: latest
+        update_cache: yes
+
+    - name: Install Git, Maven, and Amazon Corretto 21
+      dnf:
+        name:
+          - git
+          - maven
+          - java-21-amazon-corretto-devel
+        state: present
+        
+    - name: Add Jenkins Repository
+      get_url:
+        url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+        dest: /etc/yum.repos.d/jenkins.repo
+
+    - name: Import Jenkins GPG Key
+      rpm_key:
+        state: present
+        key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+    - name: Install Jenkins
+      dnf:
+        name: jenkins
+        state: present
+        
+    - name: Start jenkins service
+      service:
+        name: jenkins
+        state: started
+        enabled: true
+
+    - name: Check if jenkins is accessible
+      uri:
+        url: http://localhost:8080
+        method: GET
+        status_code: 200

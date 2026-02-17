@@ -1,0 +1,44 @@
+---
+- name: Install Docker
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Update all packages
+      dnf:
+        name: "*"
+        state: latest
+        update_cache: yes
+
+    - name: Install Docker
+      dnf:
+        name: docker
+        state: present
+
+    - name: download docker compose
+      shell: "curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -o /usr/bin/docker-compose"
+      args:
+        creates: /usr/bin/docker-compose
+
+    - name: make docker-compose executable
+      file:
+        name: /usr/bin/docker-compose
+        mode: '0755'
+
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add ec2-user to docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+
+    - name: Change ownership of docker.sock to jenkins group
+      become: yes
+      file:
+        path: /var/run/docker.sock
+        group: jenkins
+        mode: '0660'

@@ -1,0 +1,41 @@
+---
+- name: Install Grafana
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Import Grafana GPG Key
+      rpm_key:
+        state: present
+        key: https://rpm.grafana.com/gpg.key
+
+
+    - name: Create grafana repo
+      copy:
+        dest: "/etc/yum.repos.d/grafana.repo"
+        content: |
+          [grafana]
+          name=grafana
+          baseurl=https://rpm.grafana.com
+          repo_gpgcheck=1
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://rpm.grafana.com/gpg.key
+          sslverify=1
+          sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+
+    - name: Install Grafana
+      dnf:
+        name: grafana
+        state: present
+
+    - name: "Grafana server started"
+      service:
+        name: grafana-server
+        enabled: true
+        state: started
+
+    - name: "Check if Grafana is accessible."
+      uri:
+        url: http://localhost:3000
+        method: GET
+        status_code: 200
