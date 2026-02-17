@@ -4,7 +4,7 @@
   become: yes
   tasks:
     - name: Build docker image
-      shell: "docker build -t marekczajkowski992/abctech:latest ."
+      shell: "docker build -t marekczajkowski992/abctech:$BUILD_NUMBER ."
 
     - name: Restart docker-compose
       shell: "docker-compose down && docker-compose up -d"

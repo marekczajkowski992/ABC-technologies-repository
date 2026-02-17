@@ -15,6 +15,6 @@ spec:
       hostname: abc-technologies
       containers:
       - name: abc-technologies
-        image: marekczajkowski992/abctech:latest
+        image: marekczajkowski992/abctech:$BUILD_NUMBER
         ports:
         - containerPort: 8080
