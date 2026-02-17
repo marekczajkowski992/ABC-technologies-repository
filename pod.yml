@@ -4,8 +4,7 @@ metadata:
   name: abctech-pod
   labels:
     app: abctech
-  namespace: abc-ns
 spec:
   containers:
-  - name: 
+  - name: abc-technologies
     image: marekczajkowski992/abctech:latest
