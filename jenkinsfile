@@ -58,7 +58,6 @@ pipeline {
         label 'control-node'
       }
       steps{
-        sh 'aws eks update-kubeconfig --region eu-north-1 --name IG-cluster'
         sh 'ansible-playbook abc-deploy-to-k8s.yml'
       }
     }    
