@@ -12,6 +12,7 @@ spec:
       labels:
         app: abctech
     spec:
+      hostname: abc-technologies
       containers:
       - name: abc-technologies
         image: marekczajkowski992/abctech:latest
