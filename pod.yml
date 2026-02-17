@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: abctech-pod
+  labels:
+    app: abctech
+  namespace: abc-ns
+spec:
+  containers:
+  - name: 
+    image: marekczajkowski992/abctech:latest
