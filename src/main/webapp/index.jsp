@@ -5,13 +5,13 @@
 <button name="Add Product" value="Add Product" type="button" onclick="addProduct()">Add Product</button>  
 <script>  
 function addProduct(){  
-alert("You will be navigated to Add module");  
+alert("Please add your product with product name, product type and price");  
 }  
 </script>  
     <button name="View Product" value="View Product" type="button" onclick="viewProduct()">View Product</button>  
 <script>  
 function viewProduct(){  
-alert("You will be navigated to view module");  
+alert("Please see available products with their names, types and prices");  
 }
 </script>
 </body>
