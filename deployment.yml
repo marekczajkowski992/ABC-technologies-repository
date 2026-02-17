@@ -16,4 +16,4 @@ spec:
       - name: abc-technologies
         image: marekczajkowski992/abctech:latest
         ports:
-        - containerPort: 4789
+        - containerPort: 8080

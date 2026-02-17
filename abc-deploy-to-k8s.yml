@@ -2,6 +2,18 @@
 - name: Deploy ABCtechnologies app to kubernetes cluster
   hosts: localhost
   tasks:
+    - name: Pods cleanup
+      shell: "kubectl delete pods --all"
+
+    - name: Replicaset cleanup
+      shell: "kubectl delete rs --all"
+
+    - name: services cleanup
+      shell: "kubectl delete services --all"
+
+    - name: deployments cleanup
+      shell: "kubectl delete deployments --all"
+
     - name: Create deployment
       shell: "kubectl apply -f deployment.yml"
 
